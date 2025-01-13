@@ -13,7 +13,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
-const mongoose = require('mongoose');
 require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI, {
