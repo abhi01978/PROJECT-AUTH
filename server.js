@@ -15,12 +15,9 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 require('dotenv').config();
 
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB Atlas'))
-.catch((error) => console.error('MongoDB connection error:', error));
+mongoose.connect('mongodb://localhost:27017/mydb')
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error("MongoDB connection error:", err));
 
 // MongoDB Connection
 // mongoose
