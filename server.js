@@ -4,30 +4,6 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const multer = require('multer');
-const path = require('path');
-
-// Configure storage for uploaded images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/uploads/'); // Directory for uploaded files
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
-});
-
-// File filter to accept only images
-const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
-  if (allowedMimeTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, and GIF are allowed.'));
-  }
-};
-
-const upload = multer({ storage, fileFilter });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,25 +13,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log('Connected to MongoDB');
-}).catch((error) => {
-  console.error('MongoDB connection error:', error);
-});
 
 // MongoDB Connection
-// mongoose
-//   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log('Connected to MongoDB'))
-//   .catch(err => console.error('MongoDB connection error:', err));
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Session Configuration
 app.use(
@@ -75,9 +38,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  image: { type: String }, // URL or file path for the user's profile image
 });
-
 const User = mongoose.model('User', userSchema);
 
 // Middleware to protect routes
@@ -93,12 +54,10 @@ app.get('/', (req, res) => res.redirect('/login'));
 
 // Registration
 app.get('/register', (req, res) => res.render('register'));
-app.post('/register', upload.single('image'), async (req, res) => {
+app.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null; // Save image path
   const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = new User({ name, email, password: hashedPassword, image });
+  const user = new User({ name, email, password: hashedPassword });
   try {
     await user.save();
     res.redirect('/login');
@@ -106,7 +65,6 @@ app.post('/register', upload.single('image'), async (req, res) => {
     res.render('register', { error: 'User already exists or invalid data.' });
   }
 });
-
 
 // Login
 app.get('/login', (req, res) => res.render('login'));
