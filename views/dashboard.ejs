@@ -1,0 +1,10 @@
+<h1>Welcome, <%= user.name %>!</h1>
+<% if (user.image) { %>
+    <img src="<%= user.image %>" alt="Profile Image" style="width: 100px; height: 100px; border-radius: 50%;">
+<% } else { %>
+    <img src="/uploads/default-avatar.png" alt="Default Avatar" style="width: 100px; height: 100px; border-radius: 50%;">
+<% } %>
+<p>Your email: <%= user.email %></p>
+<form action="/logout" method="POST">
+    <button type="submit">Logout</button>
+</form>
